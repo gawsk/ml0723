@@ -1,12 +1,12 @@
-import java.util.Date;
+import java.util.Calendar;
 
 public class RentalAgreement {
     private String toolCode;
     private ToolType toolType;
     private String brand;
     private int rentalDayCount;
-    private Date checkoutDate;
-    private Date dueDate;
+    private Calendar checkoutDate;
+    private Calendar dueDate;
     private float dailyCharge;
     private int chargeableDays;
     private float preDiscountCharge;
@@ -18,7 +18,7 @@ public class RentalAgreement {
 
     public RentalAgreement(){}
 
-    public RentalAgreement(Tool tool, int rentalDayCount, Date checkoutDate, Date dueDate, int chargeableDays, float preDiscountCharge, int discountPercent,
+    public RentalAgreement(Tool tool, int rentalDayCount, Calendar checkoutDate, Calendar dueDate, int chargeableDays, float preDiscountCharge, int discountPercent,
                             float discountAmount, float finalCharge) {
         this.toolCode = tool.getToolCode();
         this.toolType = tool.getToolType();
@@ -26,6 +26,7 @@ public class RentalAgreement {
         this.rentalDayCount = rentalDayCount;
         this.checkoutDate = checkoutDate;
         this.dueDate = dueDate;
+        this.dailyCharge = tool.getToolType().getDailyCharge();
         this.chargeableDays = chargeableDays;
         this.preDiscountCharge = preDiscountCharge;
         this.discountPercent = discountPercent;
@@ -87,19 +88,19 @@ public class RentalAgreement {
         this.rentalDayCount = rentalDayCount;
     }
 
-    public Date getCheckoutDate() {
+    public Calendar getCheckoutDate() {
         return checkoutDate;
     }
 
-    public void setCheckoutDate(Date checkoutDate) {
+    public void setCheckoutDate(Calendar checkoutDate) {
         this.checkoutDate = checkoutDate;
     }
 
-    public Date getDueDate() {
+    public Calendar getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(Date dueDate) {
+    public void setDueDate(Calendar dueDate) {
         this.dueDate = dueDate;
     }
 
