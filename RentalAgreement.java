@@ -1,3 +1,4 @@
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class RentalAgreement {
@@ -13,6 +14,7 @@ public class RentalAgreement {
     private int discountPercent;
     private float discountAmount;
     private float finalCharge;
+    private final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy");
 
     // ******************************* Constructers *******************************
 
@@ -38,14 +40,13 @@ public class RentalAgreement {
 
     public void printAgreementValues(){
 
-        //TODO: correctly format dates.
         //TODO: do I want to do rounding in here and store the larger decimal, or have checkout save the 2 floating point decimal?
         System.out.println(String.format("Tool code: %s", toolCode));
         System.out.println(String.format("Tool type: %s", toolType.getName()));
         System.out.println(String.format("Tool brand: %s", brand));
         System.out.println(String.format("Rental Days: %d", rentalDayCount));
-        System.out.println(String.format("Check out date: %t", checkoutDate));
-        System.out.println(String.format("Due date: %t", dueDate));
+        System.out.println(String.format("Check out date: %s", sdf.format(checkoutDate.getTime())));
+        System.out.println(String.format("Due date: %s", sdf.format(dueDate.getTime())));
         System.out.println(String.format("Daily rental charge: $%.2f", toolType.getDailyCharge()));
         System.out.println(String.format("Charge days: %d", chargeableDays));
         System.out.println(String.format("Pre-discount charge: $%.2f", preDiscountCharge));
