@@ -23,12 +23,15 @@ public class CheckoutServiceImpl {
 
         int chargeableDays = rentalDayCount;
         if(!tool.getToolType().getWeekendCharge() && chargeableDays > 0) {
-            chargeableDays -= getNumberOfWeekends(checkoutDate, dueDate);
+            chargeableDays -= getNumberOfWeekends(checkoutDate, rentalDayCount);
         }
 
         if (!tool.getToolType().getHolidayCharge() && chargeableDays > 0) {
-            chargeableDays -= getNumberOfHolidays(checkoutDate, dueDate);
+            chargeableDays -= getNumberOfHolidays(checkoutDate, rentalDayCount);
         }
+
+        // Sanity check to not have chargeableDays be negative
+        chargeableDays = Math.max(0, chargeableDays);
 
         BigDecimal preDiscountCharge = new BigDecimal(tool.getToolType().getDailyCharge() * chargeableDays);
         preDiscountCharge = preDiscountCharge.setScale(2, RoundingMode.UP);
@@ -42,11 +45,23 @@ public class CheckoutServiceImpl {
                                     discount, discountAmount.floatValue(), finalCharge.floatValue());
     }
 
-    private int getNumberOfWeekends(Calendar checkoutDate, Calendar dueDate) {
-        return 0;
+    private int getNumberOfWeekends(Calendar checkoutDate, int rentalDayCount) {
+        int numberOfWeekends = (rentalDayCount / 7) * 2;
+        int remainder = rentalDayCount % 7;
+        if (remainder > 0) {
+            //TODO: Think of better implementation
+            //This is okay because it's O(1), but there's likely a cleaner way to implement
+            for (int i = 0; i < remainder; i++) {
+                checkoutDate.add(Calendar.DAY_OF_WEEK, 1);
+                if(checkoutDate.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || checkoutDate.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                    numberOfWeekends++;
+                }
+            }
+        }
+        return numberOfWeekends;
     }
 
-    private int getNumberOfHolidays(Calendar checkoutDate, Calendar dueDate) {
+    private int getNumberOfHolidays(Calendar checkoutDate, int rentalDayCount) {
         return 0;
     }
 }
