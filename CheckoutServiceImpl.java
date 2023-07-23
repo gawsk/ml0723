@@ -27,7 +27,7 @@ public class CheckoutServiceImpl {
         }
 
         if (!tool.getToolType().getHolidayCharge() && chargeableDays > 0) {
-            chargeableDays -= getNumberOfHolidays(checkoutDate, rentalDayCount);
+            chargeableDays -= getNumberOfHolidays(checkoutDate, rentalDayCount, dueDate);
         }
 
         // Sanity check to not have chargeableDays be negative
@@ -61,7 +61,15 @@ public class CheckoutServiceImpl {
         return numberOfWeekends;
     }
 
-    private int getNumberOfHolidays(Calendar checkoutDate, int rentalDayCount) {
-        return 0;
+    private int getNumberOfHolidays(Calendar checkoutDate, int rentalDayCount, Calendar dueDate) {
+        //Logic for a year would be different than for less than a year
+        int numberOfHolidays = 0;
+        if(rentalDayCount <= 365) {
+
+        } else {
+
+        }
+
+        return numberOfHolidays;
     }
 }
