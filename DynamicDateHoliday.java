@@ -4,7 +4,7 @@ import java.time.Month;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 
-public class DynamicDateHoliday {
+public class DynamicDateHoliday implements Holiday {
     private Month month;
     private TemporalAdjuster dayOfWeekInMonth;
 
