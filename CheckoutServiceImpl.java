@@ -1,9 +1,10 @@
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Calendar;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 
 public class CheckoutServiceImpl {
-    public RentalAgreement checkout(String toolCode, int rentalDayCount, int discount, Calendar checkoutDate) throws Exception {
+    public RentalAgreement checkout(String toolCode, int rentalDayCount, int discount, LocalDate checkoutDate) throws Exception {
         // Data Validation
         if(rentalDayCount < 1) {
             throw new Exception(String.format("Invalid Rental day count {%d}: Rental day count must be 1 or greater.", rentalDayCount));
@@ -17,9 +18,7 @@ public class CheckoutServiceImpl {
         Tool tool = toolRepository.getTool(toolCode);
         // Validation for tool can go after here to check for a null response
 
-        Calendar dueDate = Calendar.getInstance();
-        dueDate.setTime(checkoutDate.getTime());
-        dueDate.add(Calendar.DAY_OF_MONTH, rentalDayCount);
+        LocalDate dueDate = checkoutDate.plusDays(rentalDayCount);
 
         int chargeableDays = rentalDayCount;
         if(!tool.getToolType().getWeekendCharge() && chargeableDays > 0) {
@@ -33,11 +32,12 @@ public class CheckoutServiceImpl {
         // Sanity check to not have chargeableDays be negative
         chargeableDays = Math.max(0, chargeableDays);
 
+        //Might need to change rounding to happen at the end when saving the data
         BigDecimal preDiscountCharge = new BigDecimal(tool.getToolType().getDailyCharge() * chargeableDays);
-        preDiscountCharge = preDiscountCharge.setScale(2, RoundingMode.UP);
+        preDiscountCharge = preDiscountCharge.setScale(2, RoundingMode.HALF_UP);
 
         BigDecimal discountAmount = preDiscountCharge.multiply(new BigDecimal(discount / 100d));
-        discountAmount = discountAmount.setScale(2, RoundingMode.UP);
+        discountAmount = discountAmount.setScale(2, RoundingMode.HALF_UP);
 
         BigDecimal finalCharge = preDiscountCharge.subtract(discountAmount);
 
@@ -45,15 +45,15 @@ public class CheckoutServiceImpl {
                                     discount, discountAmount.floatValue(), finalCharge.floatValue());
     }
 
-    private int getNumberOfWeekends(Calendar checkoutDate, int rentalDayCount) {
+    private int getNumberOfWeekends(LocalDate checkoutDate, int rentalDayCount) {
         int numberOfWeekends = (rentalDayCount / 7) * 2;
         int remainder = rentalDayCount % 7;
         if (remainder > 0) {
             //TODO: Think of better implementation
             //This is okay because it's O(1), but there's likely a cleaner way to implement
             for (int i = 0; i < remainder; i++) {
-                checkoutDate.add(Calendar.DAY_OF_WEEK, 1);
-                if(checkoutDate.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || checkoutDate.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                checkoutDate.plusDays(1);
+                if(checkoutDate.getDayOfWeek() == DayOfWeek.SATURDAY || checkoutDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
                     numberOfWeekends++;
                 }
             }
@@ -61,7 +61,7 @@ public class CheckoutServiceImpl {
         return numberOfWeekends;
     }
 
-    private int getNumberOfHolidays(Calendar checkoutDate, int rentalDayCount, Calendar dueDate) {
+    private int getNumberOfHolidays(LocalDate checkoutDate, int rentalDayCount, LocalDate dueDate) {
         //Logic for a year would be different than for less than a year
         int numberOfHolidays = 0;
         if(rentalDayCount <= 365) {
