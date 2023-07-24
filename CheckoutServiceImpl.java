@@ -2,6 +2,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.Month;
 
 public class CheckoutServiceImpl {
     public RentalAgreement checkout(String toolCode, int rentalDayCount, int discount, LocalDate checkoutDate) throws Exception {
@@ -49,8 +50,6 @@ public class CheckoutServiceImpl {
         int numberOfWeekends = (rentalDayCount / 7) * 2;
         int remainder = rentalDayCount % 7;
         if (remainder > 0) {
-            //TODO: Think of better implementation
-            //This is okay because it's O(1), but there's likely a cleaner way to implement
             for (int i = 0; i < remainder; i++) {
                 checkoutDate.plusDays(1);
                 if(checkoutDate.getDayOfWeek() == DayOfWeek.SATURDAY || checkoutDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
@@ -64,12 +63,48 @@ public class CheckoutServiceImpl {
     private int getNumberOfHolidays(LocalDate checkoutDate, int rentalDayCount, LocalDate dueDate) {
         //Logic for a year would be different than for less than a year
         int numberOfHolidays = 0;
-        if(rentalDayCount <= 365) {
-
-        } else {
-
+        HolidayRepository holidays = HolidayRepository.getInstance();
+        if(rentalDayCount >= 365) {
+            int years = checkoutDate.getYear() - dueDate.getYear();
+            checkoutDate.plusYears(years);
+            if (checkoutDate.isAfter(dueDate)) {
+                years -= 1;
+                checkoutDate.minusYears(1);
+            }
+            numberOfHolidays = (years * holidays.getTotalHolidays());          
         }
 
+        // Could combine logics with different looping logic, but prefer how straightforward splitting them up is to understand
+        if(checkoutDate.getYear() < dueDate.getYear()) {
+            for(int month = checkoutDate.getMonthValue(); month <= Month.DECEMBER.getValue(); month++) {
+                for(Holiday holiday : holidays.getAllHolidaysInMonth(Month.of(month))) {
+                    LocalDate holidayDate = holiday.getDateInYear(checkoutDate.getYear());
+                    if(holidayDate.isAfter(checkoutDate)) {
+                        numberOfHolidays++;
+                    }
+                }
+            }
+
+            for(int month = Month.JANUARY.getValue(); month <= dueDate.getMonthValue(); month++) {
+                for(Holiday holiday : holidays.getAllHolidaysInMonth(Month.of(month))) {
+                    LocalDate holidayDate = holiday.getDateInYear(dueDate.getYear());
+                    //isBefore or isEqual === !isAfter
+                    if(!holidayDate.isAfter(dueDate)) {
+                        numberOfHolidays++;
+                    }
+                }
+            }
+        } else {
+            for(int month = checkoutDate.getMonthValue(); month <= dueDate.getMonthValue(); month++) {
+                for(Holiday holiday : holidays.getAllHolidaysInMonth(Month.of(month))) {
+                    LocalDate holidayDate = holiday.getDateInYear(checkoutDate.getYear());
+                    //isBefore or isEqual === !isAfter
+                    if(holidayDate.isAfter(checkoutDate) && !holidayDate.isAfter(dueDate)) {
+                        numberOfHolidays++;
+                    }
+                }
+            }
+        }
         return numberOfHolidays;
     }
 }
