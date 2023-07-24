@@ -1,26 +1,26 @@
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class RentalAgreement {
     private String toolCode;
     private ToolType toolType;
     private String brand;
     private int rentalDayCount;
-    private Calendar checkoutDate;
-    private Calendar dueDate;
+    private LocalDate checkoutDate;
+    private LocalDate dueDate;
     private float dailyCharge;
     private int chargeableDays;
     private float preDiscountCharge;
     private int discountPercent;
     private float discountAmount;
     private float finalCharge;
-    private final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yy");
 
     // ******************************* Constructers *******************************
 
     public RentalAgreement(){}
 
-    public RentalAgreement(Tool tool, int rentalDayCount, Calendar checkoutDate, Calendar dueDate, int chargeableDays, float preDiscountCharge, int discountPercent,
+    public RentalAgreement(Tool tool, int rentalDayCount, LocalDate checkoutDate, LocalDate dueDate, int chargeableDays, float preDiscountCharge, int discountPercent,
                             float discountAmount, float finalCharge) {
         this.toolCode = tool.getToolCode();
         this.toolType = tool.getToolType();
@@ -45,8 +45,8 @@ public class RentalAgreement {
         System.out.println(String.format("Tool type: %s", toolType.getName()));
         System.out.println(String.format("Tool brand: %s", brand));
         System.out.println(String.format("Rental Days: %d", rentalDayCount));
-        System.out.println(String.format("Check out date: %s", sdf.format(checkoutDate.getTime())));
-        System.out.println(String.format("Due date: %s", sdf.format(dueDate.getTime())));
+        System.out.println(String.format("Check out date: %s", formatter.format(checkoutDate)));
+        System.out.println(String.format("Due date: %s", formatter.format(dueDate)));
         System.out.println(String.format("Daily rental charge: $%.2f", toolType.getDailyCharge()));
         System.out.println(String.format("Charge days: %d", chargeableDays));
         System.out.println(String.format("Pre-discount charge: $%.2f", preDiscountCharge));
@@ -89,19 +89,19 @@ public class RentalAgreement {
         this.rentalDayCount = rentalDayCount;
     }
 
-    public Calendar getCheckoutDate() {
+    public LocalDate getCheckoutDate() {
         return checkoutDate;
     }
 
-    public void setCheckoutDate(Calendar checkoutDate) {
+    public void setCheckoutDate(LocalDate checkoutDate) {
         this.checkoutDate = checkoutDate;
     }
 
-    public Calendar getDueDate() {
+    public LocalDate getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(Calendar dueDate) {
+    public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }
 

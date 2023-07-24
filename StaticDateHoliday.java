@@ -1,35 +1,34 @@
-import java.util.Calendar;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 
 public class StaticDateHoliday implements Holiday {
-    private Calendar date;
+    private LocalDate date;
     private boolean observedOnWeekend;
 
     public StaticDateHoliday(){}
 
-    public StaticDateHoliday(Calendar date, boolean observedOnWeekend) {
+    public StaticDateHoliday(LocalDate date, boolean observedOnWeekend) {
         this.date = date;
         this.observedOnWeekend = observedOnWeekend;
     }
 
-    public Calendar getDateInYear(int year) {
-        Calendar dateInYear = Calendar.getInstance();
-        dateInYear.clear();
-        dateInYear.set(year, date.get(Calendar.MONTH), date.get(Calendar.DAY_OF_MONTH));
+    public LocalDate getDateInYear(int year) {
+        LocalDate dateInYear = date.withYear(year);
         if(!observedOnWeekend) {
-            if(dateInYear.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-                dateInYear.add(Calendar.DAY_OF_MONTH, -1);
-            } else if (dateInYear.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-                dateInYear.add(Calendar.DAY_OF_MONTH, 1);
+            if(dateInYear.getDayOfWeek() == DayOfWeek.SATURDAY) {
+                dateInYear.minusDays(1);
+            } else if (dateInYear.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                dateInYear.plusDays(1);
             }
         }
         return dateInYear;
     }
 
-    public Calendar getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Calendar date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

@@ -1,7 +1,7 @@
-import java.util.Calendar;
+import java.time.LocalDate;
 
 public interface Holiday {
 
-    public Calendar getDateInYear(int year);
+    public LocalDate getDateInYear(int year);
 
 }
