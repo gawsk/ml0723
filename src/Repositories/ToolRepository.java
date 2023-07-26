@@ -20,7 +20,7 @@ public class ToolRepository {
 
         toolType = new ToolType("Jackhammer", 2.99f, true, false, false);
         tools.put("JAKD", new Tool("JAKD", toolType, "DeWalt"));
-        tools.put("JAKD", new Tool("JAKR", toolType, "Ridgid"));
+        tools.put("JAKR", new Tool("JAKR", toolType, "Ridgid"));
     }
 
     public static ToolRepository getInstance() {

@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Set;
 
 import Repositories.HolidayRepository;
 import Repositories.ToolRepository;
@@ -59,6 +60,7 @@ public class CheckoutServiceImpl {
         int remainder = rentalDayCount % 7;
         if (remainder > 0) {
             for (int i = 0; i < remainder; i++) {
+                //TODO: This is currently broken since this doesn't add days
                 checkoutDate.plusDays(1);
                 if(checkoutDate.getDayOfWeek() == DayOfWeek.SATURDAY || checkoutDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
                     numberOfWeekends++;
@@ -72,9 +74,11 @@ public class CheckoutServiceImpl {
         //Logic for a year would be different than for less than a year
         int numberOfHolidays = 0;
         HolidayRepository holidays = HolidayRepository.getInstance();
+        //TODO: Change logic to handle leap years
         if(rentalDayCount >= 365) {
-            int years = checkoutDate.getYear() - dueDate.getYear();
-            checkoutDate.plusYears(years);
+            int years =  dueDate.getYear() - checkoutDate.getYear();
+            //This doesn't change checkoutDate
+            checkoutDate.plusDays(365 * years);
             if (checkoutDate.isAfter(dueDate)) {
                 years -= 1;
                 checkoutDate.minusYears(1);
@@ -85,30 +89,39 @@ public class CheckoutServiceImpl {
         // Could combine logics with different looping logic, but prefer how straightforward splitting them up is to understand
         if(checkoutDate.getYear() < dueDate.getYear()) {
             for(int month = checkoutDate.getMonthValue(); month <= Month.DECEMBER.getValue(); month++) {
-                for(Holiday holiday : holidays.getAllHolidaysInMonth(Month.of(month))) {
-                    LocalDate holidayDate = holiday.getDateInYear(checkoutDate.getYear());
-                    if(holidayDate.isAfter(checkoutDate)) {
-                        numberOfHolidays++;
+                Set<Holiday> holidaysSet = holidays.getAllHolidaysInMonth(Month.of(month));
+                if(holidaysSet != null) {
+                    for(Holiday holiday : holidaysSet) {
+                        LocalDate holidayDate = holiday.getDateInYear(checkoutDate.getYear());
+                        if(holidayDate.isAfter(checkoutDate)) {
+                            numberOfHolidays++;
+                        }
                     }
                 }
             }
 
             for(int month = Month.JANUARY.getValue(); month <= dueDate.getMonthValue(); month++) {
-                for(Holiday holiday : holidays.getAllHolidaysInMonth(Month.of(month))) {
-                    LocalDate holidayDate = holiday.getDateInYear(dueDate.getYear());
-                    //isBefore or isEqual === !isAfter
-                    if(!holidayDate.isAfter(dueDate)) {
-                        numberOfHolidays++;
+                Set<Holiday> holidaysSet = holidays.getAllHolidaysInMonth(Month.of(month));
+                if(holidaysSet != null) {
+                    for(Holiday holiday : holidaysSet) {
+                        LocalDate holidayDate = holiday.getDateInYear(dueDate.getYear());
+                        //isBefore or isEqual === !isAfter
+                        if(!holidayDate.isAfter(dueDate)) {
+                            numberOfHolidays++;
+                        }
                     }
                 }
             }
         } else {
             for(int month = checkoutDate.getMonthValue(); month <= dueDate.getMonthValue(); month++) {
-                for(Holiday holiday : holidays.getAllHolidaysInMonth(Month.of(month))) {
-                    LocalDate holidayDate = holiday.getDateInYear(checkoutDate.getYear());
-                    //isBefore or isEqual === !isAfter
-                    if(holidayDate.isAfter(checkoutDate) && !holidayDate.isAfter(dueDate)) {
-                        numberOfHolidays++;
+                Set<Holiday> holidaysSet = holidays.getAllHolidaysInMonth(Month.of(month));
+                if(holidaysSet != null) {
+                    for(Holiday holiday : holidaysSet) {
+                        LocalDate holidayDate = holiday.getDateInYear(checkoutDate.getYear());
+                        //isBefore or isEqual === !isAfter
+                        if(holidayDate.isAfter(checkoutDate) && !holidayDate.isAfter(dueDate)) {
+                            numberOfHolidays++;
+                        }
                     }
                 }
             }

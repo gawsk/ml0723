@@ -72,4 +72,118 @@ public class CheckoutServiceTest {
 
         assertThat(rentalAgreementCheckout).usingRecursiveComparison().isEqualTo(rentalAgreementAssert);
     }
+
+    @Test
+    public void noHolidayCharge_MultiHolidayInRange() throws Exception {
+        String toolCode = "LADW"; // Yes Weekend Charge, No Holiday Charge
+        int rentalDayCount = 70;
+        int discount = 10;
+        LocalDate checkoutDate = LocalDate.of(2020, 7, 2);
+
+        RentalAgreement rentalAgreementCheckout = serviceImpl.checkout(toolCode, rentalDayCount, discount,
+                checkoutDate);
+
+        RentalAgreement rentalAgreementAssert = new RentalAgreement(toolRepository.getTool(toolCode), rentalDayCount,
+                checkoutDate, checkoutDate.plusDays(rentalDayCount), 68, 135.32f, discount, 13.53f, 121.79f);
+
+        assertThat(rentalAgreementCheckout).usingRecursiveComparison().isEqualTo(rentalAgreementAssert);
+    }
+
+    @Test
+    public void noWeekendCharge_SingleWeekendHolidayInRange() throws Exception {
+        String toolCode = "CHNS"; // Yes Weekend Charge, No Holiday Charge
+        int rentalDayCount = 5;
+        int discount = 25;
+        LocalDate checkoutDate = LocalDate.of(2015, 7, 2);
+
+        RentalAgreement rentalAgreementCheckout = serviceImpl.checkout(toolCode, rentalDayCount, discount,
+                checkoutDate);
+
+        RentalAgreement rentalAgreementAssert = new RentalAgreement(toolRepository.getTool(toolCode), rentalDayCount,
+                checkoutDate, checkoutDate.plusDays(rentalDayCount), 3, 4.47f, discount, 1.12f, 3.35f);
+
+        assertThat(rentalAgreementCheckout).usingRecursiveComparison().isEqualTo(rentalAgreementAssert);
+    }
+
+    @Test
+    public void noWeekendCharge_MultiWeekendInRange() throws Exception {
+        String toolCode = "CHNS";
+        int rentalDayCount = 8;
+        int discount = 25;
+        LocalDate checkoutDate = LocalDate.of(2015, 7, 3);
+
+        RentalAgreement rentalAgreementCheckout = serviceImpl.checkout(toolCode, rentalDayCount, discount,
+                checkoutDate);
+
+        RentalAgreement rentalAgreementAssert = new RentalAgreement(toolRepository.getTool(toolCode), rentalDayCount,
+                checkoutDate, checkoutDate.plusDays(rentalDayCount), 5, 7.45f, discount, 1.86f, 5.59f);
+
+        assertThat(rentalAgreementCheckout).usingRecursiveComparison().isEqualTo(rentalAgreementAssert);
+    }
+
+    @Test
+    public void noHolidayChargeAndNoWeekendCharge_SingleWeekendAndSingleHolidayInRange() throws Exception {
+        String toolCode = "JAKD";
+        int rentalDayCount = 6;
+        int discount = 0;
+        LocalDate checkoutDate = LocalDate.of(2015, 9, 3);
+
+        RentalAgreement rentalAgreementCheckout = serviceImpl.checkout(toolCode, rentalDayCount, discount,
+                checkoutDate);
+
+        RentalAgreement rentalAgreementAssert = new RentalAgreement(toolRepository.getTool(toolCode), rentalDayCount,
+                checkoutDate, checkoutDate.plusDays(rentalDayCount), 3, 8.97f, discount, 0f, 8.97f);
+
+        assertThat(rentalAgreementCheckout).usingRecursiveComparison().isEqualTo(rentalAgreementAssert);
+    }
+
+    @Test
+    public void noHolidayChargeAndNoWeekendCharge_MultiWeekendAndSingleWeekendHolidayInRange() throws Exception {
+        String toolCode = "JAKR";
+        int rentalDayCount = 9;
+        int discount = 0;
+        LocalDate checkoutDate = LocalDate.of(2015, 7, 2);
+
+        RentalAgreement rentalAgreementCheckout = serviceImpl.checkout(toolCode, rentalDayCount, discount,
+                checkoutDate);
+
+        RentalAgreement rentalAgreementAssert = new RentalAgreement(toolRepository.getTool(toolCode), rentalDayCount,
+                checkoutDate, checkoutDate.plusDays(rentalDayCount), 5, 14.95f, discount, 0f, 14.95f);
+
+        assertThat(rentalAgreementCheckout).usingRecursiveComparison().isEqualTo(rentalAgreementAssert);
+    }
+
+    @Test
+    public void noHolidayChargeAndNoWeekendCharge_SingleWeekendAndSingleWeekendHolidayInRange() throws Exception {
+        String toolCode = "JAKR";
+        int rentalDayCount = 4;
+        int discount = 50;
+        LocalDate checkoutDate = LocalDate.of(2020, 7, 2);
+
+        RentalAgreement rentalAgreementCheckout = serviceImpl.checkout(toolCode, rentalDayCount, discount,
+                checkoutDate);
+
+        RentalAgreement rentalAgreementAssert = new RentalAgreement(toolRepository.getTool(toolCode), rentalDayCount,
+                checkoutDate, checkoutDate.plusDays(rentalDayCount), 1, 2.99f, discount, 1.50f, 1.49f);
+
+        assertThat(rentalAgreementCheckout).usingRecursiveComparison().isEqualTo(rentalAgreementAssert);
+    }
+
+    @Test
+    public void noHolidayChargeAndNoWeekendCharge_LeapYearRental() throws Exception {
+        String toolCode = "JAKR";
+        int rentalDayCount = 365;
+        int discount = 0;
+        LocalDate checkoutDate = LocalDate.of(2015, 7, 4);
+        //Weekends: 52 + 1 day
+        //Holidays: 1 (Misses both July 4th holidays)
+
+        RentalAgreement rentalAgreementCheckout = serviceImpl.checkout(toolCode, rentalDayCount, discount,
+                checkoutDate);
+
+        RentalAgreement rentalAgreementAssert = new RentalAgreement(toolRepository.getTool(toolCode), rentalDayCount,
+                checkoutDate, checkoutDate.plusDays(rentalDayCount), 259, 774.41f, discount, 0f, 774.41f);
+
+        assertThat(rentalAgreementCheckout).usingRecursiveComparison().isEqualTo(rentalAgreementAssert);
+    }
 }
