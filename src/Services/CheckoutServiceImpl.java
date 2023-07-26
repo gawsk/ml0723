@@ -6,11 +6,11 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
 
+import Repositories.HolidayRepository;
+import Repositories.ToolRepository;
 import Objects.Holiday;
 import Objects.RentalAgreement;
 import Objects.Tool;
-import Repositories.HolidayRepository;
-import Repositories.ToolRepository;
 
 public class CheckoutServiceImpl {
     public RentalAgreement checkout(String toolCode, int rentalDayCount, int discount, LocalDate checkoutDate) throws Exception {
