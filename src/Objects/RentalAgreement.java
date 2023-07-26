@@ -15,7 +15,6 @@ public class RentalAgreement {
     private int discountPercent;
     private float discountAmount;
     private float finalCharge;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yy");
 
     // ******************************* Constructers *******************************
 
@@ -40,6 +39,8 @@ public class RentalAgreement {
     // ******************************* Print Method *******************************
 
     public void printAgreementValues(){
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yy");
 
         //TODO: do I want to do rounding in here and store the larger decimal, or have checkout save the 2 floating point decimal?
         System.out.println(String.format("Tool code: %s", toolCode));

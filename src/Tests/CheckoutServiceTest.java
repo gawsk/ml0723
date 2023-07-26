@@ -2,6 +2,8 @@ package Tests;
 
 import java.time.LocalDate;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -10,6 +12,7 @@ import org.junit.rules.ExpectedException;
 import Objects.RentalAgreement;
 import Repositories.ToolRepository;
 import Services.CheckoutServiceImpl;
+
 public class CheckoutServiceTest {
 
     private CheckoutServiceImpl serviceImpl;
@@ -24,12 +27,12 @@ public class CheckoutServiceTest {
         toolRepository = ToolRepository.getInstance();
     }
 
-    
     @Test
     public void tooLargeDiscount() throws Exception {
         int discount = 101;
         exceptionRule.expect(Exception.class);
-        exceptionRule.expectMessage(String.format("Invald Discount percent {%d}: Discount percent must be in the range 0-100", discount));
+        exceptionRule.expectMessage(
+                String.format("Invald Discount percent {%d}: Discount percent must be in the range 0-100", discount));
 
         serviceImpl.checkout("JAKR", 5, discount, LocalDate.now());
     }
@@ -38,7 +41,8 @@ public class CheckoutServiceTest {
     public void tooSmallDiscount() throws Exception {
         int discount = -1;
         exceptionRule.expect(Exception.class);
-        exceptionRule.expectMessage(String.format("Invald Discount percent {%d}: Discount percent must be in the range 0-100", discount));
+        exceptionRule.expectMessage(
+                String.format("Invald Discount percent {%d}: Discount percent must be in the range 0-100", discount));
 
         serviceImpl.checkout("JAKR", 5, discount, LocalDate.now());
     }
@@ -47,7 +51,8 @@ public class CheckoutServiceTest {
     public void rentalDayCountTooSmall() throws Exception {
         int rentalDayCount = 0;
         exceptionRule.expect(Exception.class);
-        exceptionRule.expectMessage(String.format("Invalid Rental day count {%d}: Rental day count must be 1 or greater.", rentalDayCount));
+        exceptionRule.expectMessage(
+                String.format("Invalid Rental day count {%d}: Rental day count must be 1 or greater.", rentalDayCount));
 
         serviceImpl.checkout("JAKR", rentalDayCount, 0, LocalDate.now());
     }
@@ -59,10 +64,12 @@ public class CheckoutServiceTest {
         int discount = 10;
         LocalDate checkoutDate = LocalDate.of(2020, 7, 2);
 
-        RentalAgreement rentalAgreementCheckout = serviceImpl.checkout(toolCode, rentalDayCount, discount, checkoutDate);
+        RentalAgreement rentalAgreementCheckout = serviceImpl.checkout(toolCode, rentalDayCount, discount,
+                checkoutDate);
 
-        RentalAgreement rentalAgreementAssert = new RentalAgreement(toolRepository.getTool(toolCode), rentalDayCount, checkoutDate, checkoutDate.plusDays(rentalDayCount), 2, 3.98f, discount, 0.40f, 3.58f);
+        RentalAgreement rentalAgreementAssert = new RentalAgreement(toolRepository.getTool(toolCode), rentalDayCount,
+                checkoutDate, checkoutDate.plusDays(rentalDayCount), 2, 3.98f, discount, 0.40f, 3.58f);
 
-        //assertThat(rentalAgreementAssert).usingRecursiveComparison().isEqualTo(rentalAgreementAssert);
+        assertThat(rentalAgreementCheckout).usingRecursiveComparison().isEqualTo(rentalAgreementAssert);
     }
 }
