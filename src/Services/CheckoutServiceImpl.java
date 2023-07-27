@@ -60,8 +60,7 @@ public class CheckoutServiceImpl {
         int remainder = rentalDayCount % 7;
         if (remainder > 0) {
             for (int i = 0; i < remainder; i++) {
-                //TODO: This is currently broken since this doesn't add days
-                checkoutDate.plusDays(1);
+                checkoutDate = checkoutDate.plusDays(1);
                 if(checkoutDate.getDayOfWeek() == DayOfWeek.SATURDAY || checkoutDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
                     numberOfWeekends++;
                 }
@@ -71,19 +70,26 @@ public class CheckoutServiceImpl {
     }
 
     private int getNumberOfHolidays(LocalDate checkoutDate, int rentalDayCount, LocalDate dueDate) {
-        //Logic for a year would be different than for less than a year
         int numberOfHolidays = 0;
         HolidayRepository holidays = HolidayRepository.getInstance();
-        //TODO: Change logic to handle leap years
-        if(rentalDayCount >= 365) {
-            int years =  dueDate.getYear() - checkoutDate.getYear();
-            //This doesn't change checkoutDate
-            checkoutDate.plusDays(365 * years);
-            if (checkoutDate.isAfter(dueDate)) {
-                years -= 1;
-                checkoutDate.minusYears(1);
+
+        
+        while (checkoutDate.plusYears(1).isBefore(dueDate)) {
+            checkoutDate = checkoutDate.plusYears(1);
+            numberOfHolidays += holidays.getTotalHolidays();
+
+            // This logic avoids double counting holidays that will be checked in the next section of code that will go month by month for the last year
+            if (!checkoutDate.plusYears(1).isBefore(dueDate)) {
+                Month month = checkoutDate.getMonth();
+                Set<Holiday> holidaysSet = holidays.getAllHolidaysInMonth(month);
+                if (holidaysSet != null) {
+                    for(Holiday holiday : holidaysSet) {
+                        if (checkoutDate.isBefore(holiday.getDateInYear(checkoutDate.getYear()))) {
+                            numberOfHolidays--;
+                        }
+                    }
+                }
             }
-            numberOfHolidays = (years * holidays.getTotalHolidays());          
         }
 
         // Could combine logics with different looping logic, but prefer how straightforward splitting them up is to understand

@@ -186,4 +186,22 @@ public class CheckoutServiceTest {
 
         assertThat(rentalAgreementCheckout).usingRecursiveComparison().isEqualTo(rentalAgreementAssert);
     }
+
+    @Test
+    public void noHolidayChargeAndNoWeekendCharge_MultiYearRental() throws Exception {
+        String toolCode = "JAKR";
+        int rentalDayCount = 730;
+        int discount = 0;
+        LocalDate checkoutDate = LocalDate.of(2015, 7, 4);
+        //Weekends: 208 + 1 day
+        //Holidays: 3 (Both Labor Days, July 4th 2016)
+
+        RentalAgreement rentalAgreementCheckout = serviceImpl.checkout(toolCode, rentalDayCount, discount,
+                checkoutDate);
+
+        RentalAgreement rentalAgreementAssert = new RentalAgreement(toolRepository.getTool(toolCode), rentalDayCount,
+                checkoutDate, checkoutDate.plusDays(rentalDayCount), 518, 1548.82f, discount, 0f, 1548.82f);
+
+        assertThat(rentalAgreementCheckout).usingRecursiveComparison().isEqualTo(rentalAgreementAssert);
+    }
 }

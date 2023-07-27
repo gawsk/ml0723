@@ -24,8 +24,7 @@ public class DynamicDateHoliday implements Holiday {
     public LocalDate getDateInYear(int year) {
         //Using a default day since it will be changed
         LocalDate dateInYear = LocalDate.of(year, month, 1);
-        dateInYear.with(dayOfWeekInMonth);
-        return dateInYear;
+        return dateInYear.with(dayOfWeekInMonth);
     }
 
     public Month getMonth() {

@@ -49,12 +49,12 @@ public class RentalAgreement {
         System.out.println(String.format("Rental Days: %d", rentalDayCount));
         System.out.println(String.format("Check out date: %s", formatter.format(checkoutDate)));
         System.out.println(String.format("Due date: %s", formatter.format(dueDate)));
-        System.out.println(String.format("Daily rental charge: $%.2f", toolType.getDailyCharge()));
+        System.out.println(String.format("Daily rental charge: $%,.2f", toolType.getDailyCharge()));
         System.out.println(String.format("Charge days: %d", chargeableDays));
-        System.out.println(String.format("Pre-discount charge: $%.2f", preDiscountCharge));
+        System.out.println(String.format("Pre-discount charge: $%,.2f", preDiscountCharge));
         System.out.println(String.format("Discount percent: %d%%", discountPercent));
-        System.out.println(String.format("Discount Amount: $%.2f", discountAmount));
-        System.out.println(String.format("Final charge: $%.2f", finalCharge));
+        System.out.println(String.format("Discount Amount: $%,.2f", discountAmount));
+        System.out.println(String.format("Final charge: $%,.2f", finalCharge));
     }
 
     // ******************************* Getters and Setters *******************************
