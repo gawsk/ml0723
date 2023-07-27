@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.Set;
 
 import Repositories.HolidayRepository;
@@ -43,10 +42,9 @@ public class CheckoutServiceImpl {
             chargeableDays -= getNumberOfHolidays(checkoutDate, rentalDayCount, dueDate, tool.getToolType().getWeekendCharge());
         }
 
-        // Sanity check to not have chargeableDays be negative
+        // Reset chargeableDays to 0 if it would ever dip below
         chargeableDays = Math.max(0, chargeableDays);
 
-        //Might need to change rounding to happen at the end when saving the data
         BigDecimal preDiscountCharge = new BigDecimal(tool.getToolType().getDailyCharge() * chargeableDays);
         preDiscountCharge = preDiscountCharge.setScale(2, RoundingMode.HALF_UP);
 

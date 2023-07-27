@@ -17,9 +17,9 @@ public class StaticDateHoliday implements Holiday {
         LocalDate dateInYear = date.withYear(year);
         if(!observedOnWeekend) {
             if(dateInYear.getDayOfWeek() == DayOfWeek.SATURDAY) {
-                dateInYear.minusDays(1);
+                dateInYear = dateInYear.minusDays(1);
             } else if (dateInYear.getDayOfWeek() == DayOfWeek.SUNDAY) {
-                dateInYear.plusDays(1);
+                dateInYear = dateInYear.plusDays(1);
             }
         }
         return dateInYear;
