@@ -11,6 +11,7 @@ import Repositories.HolidayRepository;
 import Repositories.ToolRepository;
 import Objects.Holiday;
 import Objects.RentalAgreement;
+import Objects.StaticDateHoliday;
 import Objects.Tool;
 
 public class CheckoutServiceImpl {
@@ -27,6 +28,9 @@ public class CheckoutServiceImpl {
 
         Tool tool = toolRepository.getTool(toolCode);
         // Validation for tool can go after here to check for a null response
+        if(tool == null) {
+            throw new Exception(String.format("Invalid Tool code {%s}: Tool code must be valid in the database", toolCode));
+        }
 
         LocalDate dueDate = checkoutDate.plusDays(rentalDayCount);
 
@@ -36,7 +40,7 @@ public class CheckoutServiceImpl {
         }
 
         if (!tool.getToolType().getHolidayCharge() && chargeableDays > 0) {
-            chargeableDays -= getNumberOfHolidays(checkoutDate, rentalDayCount, dueDate);
+            chargeableDays -= getNumberOfHolidays(checkoutDate, rentalDayCount, dueDate, tool.getToolType().getWeekendCharge());
         }
 
         // Sanity check to not have chargeableDays be negative
@@ -69,69 +73,28 @@ public class CheckoutServiceImpl {
         return numberOfWeekends;
     }
 
-    private int getNumberOfHolidays(LocalDate checkoutDate, int rentalDayCount, LocalDate dueDate) {
+    private int getNumberOfHolidays(LocalDate checkoutDate, int rentalDayCount, LocalDate dueDate, boolean weekendCharge) {
         int numberOfHolidays = 0;
         HolidayRepository holidays = HolidayRepository.getInstance();
+        LocalDate currentMonth = checkoutDate.plusDays(1);
 
-        
-        while (checkoutDate.plusYears(1).isBefore(dueDate)) {
-            checkoutDate = checkoutDate.plusYears(1);
-            numberOfHolidays += holidays.getTotalHolidays();
-
-            // This logic avoids double counting holidays that will be checked in the next section of code that will go month by month for the last year
-            if (!checkoutDate.plusYears(1).isBefore(dueDate)) {
-                Month month = checkoutDate.getMonth();
-                Set<Holiday> holidaysSet = holidays.getAllHolidaysInMonth(month);
-                if (holidaysSet != null) {
-                    for(Holiday holiday : holidaysSet) {
-                        if (checkoutDate.isBefore(holiday.getDateInYear(checkoutDate.getYear()))) {
-                            numberOfHolidays--;
+        while (currentMonth.getYear() < dueDate.getYear() || currentMonth.getMonthValue() <= dueDate.getMonthValue()) {
+            Set<Holiday> holidaysSet = holidays.getAllHolidaysInMonth(currentMonth.getMonth());
+            if (holidaysSet != null) {
+                for(Holiday holiday : holidaysSet) {
+                    LocalDate holidayDate = holiday.getDateInYear(currentMonth.getYear());
+                    //isBefore or isEqual === !isAfter
+                    if(holidayDate.isAfter(checkoutDate) && !holidayDate.isAfter(dueDate)) {
+                        if (weekendCharge && holiday instanceof StaticDateHoliday && ((StaticDateHoliday)holiday).isObservedOnWeekend()) {
+                            continue;
                         }
+                        numberOfHolidays++;
                     }
                 }
             }
+            currentMonth = currentMonth.plusMonths(1);
         }
 
-        // Could combine logics with different looping logic, but prefer how straightforward splitting them up is to understand
-        if(checkoutDate.getYear() < dueDate.getYear()) {
-            for(int month = checkoutDate.getMonthValue(); month <= Month.DECEMBER.getValue(); month++) {
-                Set<Holiday> holidaysSet = holidays.getAllHolidaysInMonth(Month.of(month));
-                if(holidaysSet != null) {
-                    for(Holiday holiday : holidaysSet) {
-                        LocalDate holidayDate = holiday.getDateInYear(checkoutDate.getYear());
-                        if(holidayDate.isAfter(checkoutDate)) {
-                            numberOfHolidays++;
-                        }
-                    }
-                }
-            }
-
-            for(int month = Month.JANUARY.getValue(); month <= dueDate.getMonthValue(); month++) {
-                Set<Holiday> holidaysSet = holidays.getAllHolidaysInMonth(Month.of(month));
-                if(holidaysSet != null) {
-                    for(Holiday holiday : holidaysSet) {
-                        LocalDate holidayDate = holiday.getDateInYear(dueDate.getYear());
-                        //isBefore or isEqual === !isAfter
-                        if(!holidayDate.isAfter(dueDate)) {
-                            numberOfHolidays++;
-                        }
-                    }
-                }
-            }
-        } else {
-            for(int month = checkoutDate.getMonthValue(); month <= dueDate.getMonthValue(); month++) {
-                Set<Holiday> holidaysSet = holidays.getAllHolidaysInMonth(Month.of(month));
-                if(holidaysSet != null) {
-                    for(Holiday holiday : holidaysSet) {
-                        LocalDate holidayDate = holiday.getDateInYear(checkoutDate.getYear());
-                        //isBefore or isEqual === !isAfter
-                        if(holidayDate.isAfter(checkoutDate) && !holidayDate.isAfter(dueDate)) {
-                            numberOfHolidays++;
-                        }
-                    }
-                }
-            }
-        }
         return numberOfHolidays;
     }
 }
