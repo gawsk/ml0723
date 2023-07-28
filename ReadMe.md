@@ -1,3 +1,5 @@
+All of the main code is in the src folder
+
 Running checkout is done through CheckoutServiceImpl.checkout()
 This function takes in String toolCode, int rentalDayCount, int discount, LocalDate checkoutDate
 
