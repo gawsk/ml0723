@@ -1,14 +1,24 @@
 package Tests;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.Month;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import Objects.DynamicDateHoliday;
+import Objects.Holiday;
 import Objects.RentalAgreement;
+import Objects.StaticDateHoliday;
+import Repositories.HolidayRepository;
 import Repositories.ToolRepository;
 import Services.CheckoutServiceImpl;
 
@@ -55,7 +65,7 @@ public class CheckoutServiceTest {
 
         @Test
         public void noHolidayCharge_SingleWeekendHolidayInRange() throws Exception {
-                String toolCode = "LADW"; // Yes Weekend Charge, No Holiday Charge
+                String toolCode = "LADW";
                 int rentalDayCount = 3;
                 int discount = 10;
                 LocalDate checkoutDate = LocalDate.of(2020, 7, 2);
@@ -72,7 +82,7 @@ public class CheckoutServiceTest {
 
         @Test
         public void noHolidayCharge_MultiHolidayInRange() throws Exception {
-                String toolCode = "LADW"; // Yes Weekend Charge, No Holiday Charge
+                String toolCode = "LADW";
                 int rentalDayCount = 70;
                 int discount = 10;
                 LocalDate checkoutDate = LocalDate.of(2020, 7, 2);
@@ -89,8 +99,34 @@ public class CheckoutServiceTest {
         }
 
         @Test
+        public void noHolidayCharge_MultipleHolidaysOnSameDate() throws Exception {
+                String toolCode = "LADW";
+                int rentalDayCount = 3;
+                int discount = 10;
+                LocalDate checkoutDate = LocalDate.of(2020, 7, 2);
+                HolidayRepository mockHolidayRepository = mock(HolidayRepository.class);
+
+                Set<Holiday> holidaySet = new HashSet<Holiday>();
+                holidaySet.add(new StaticDateHoliday(LocalDate.of(2020, Month.JULY, 4), false, "Fourth of July"));
+                holidaySet.add(new DynamicDateHoliday(1, Month.JULY, DayOfWeek.FRIDAY, "First Friday of July"));
+
+                when(mockHolidayRepository.getAllHolidaysInMonth(Month.JULY)).thenReturn(holidaySet);
+
+                serviceImpl = new CheckoutServiceImpl(toolRepository, mockHolidayRepository);
+
+                RentalAgreement rentalAgreementCheckout = serviceImpl.checkout(toolCode, rentalDayCount, discount,
+                                checkoutDate);
+
+                RentalAgreement rentalAgreementAssert = new RentalAgreement(toolRepository.getTool(toolCode),
+                                rentalDayCount,
+                                checkoutDate, checkoutDate.plusDays(rentalDayCount), 2, 3.98f, discount, 0.40f, 3.58f);
+
+                assertThat(rentalAgreementCheckout).usingRecursiveComparison().isEqualTo(rentalAgreementAssert);
+        }
+
+        @Test
         public void noWeekendCharge_SingleWeekendHolidayInRange() throws Exception {
-                String toolCode = "CHNS"; // Yes Weekend Charge, No Holiday Charge
+                String toolCode = "CHNS";
                 int rentalDayCount = 5;
                 int discount = 25;
                 LocalDate checkoutDate = LocalDate.of(2015, 7, 2);
@@ -140,7 +176,7 @@ public class CheckoutServiceTest {
         }
 
         @Test
-        public void noHolidayChargeAndNoWeekendCharge_MultiWeekendAndSingleWeekendHolidayInRange() throws Exception {
+        public void noHolidayChargeAndNoWeekendCharge_MultiWeekendAndSingleWeekendHolidayInRange_NotObservedOnWeekend() throws Exception {
                 String toolCode = "JAKR";
                 int rentalDayCount = 9;
                 int discount = 0;
@@ -157,7 +193,7 @@ public class CheckoutServiceTest {
         }
 
         @Test
-        public void noHolidayChargeAndNoWeekendCharge_SingleWeekendAndSingleWeekendHolidayInRange() throws Exception {
+        public void noHolidayChargeAndNoWeekendCharge_SingleWeekendAndSingleWeekendHolidayInRange_NotObservedOnWeekend() throws Exception {
                 String toolCode = "JAKR";
                 int rentalDayCount = 4;
                 int discount = 50;
@@ -169,6 +205,57 @@ public class CheckoutServiceTest {
                 RentalAgreement rentalAgreementAssert = new RentalAgreement(toolRepository.getTool(toolCode),
                                 rentalDayCount,
                                 checkoutDate, checkoutDate.plusDays(rentalDayCount), 1, 2.99f, discount, 1.50f, 1.49f);
+
+                assertThat(rentalAgreementCheckout).usingRecursiveComparison().isEqualTo(rentalAgreementAssert);
+        }
+
+        @Test
+        public void noHolidayChargeAndNoWeekendCharge_SingleWeekendAndSingleWeekendHolidayInRange_ObservedOnWeekend() throws Exception {
+                String toolCode = "JAKR";
+                int rentalDayCount = 4;
+                int discount = 50;
+                LocalDate checkoutDate = LocalDate.of(2020, 7, 2);
+                HolidayRepository mockHolidayRepository = mock(HolidayRepository.class);
+
+                Set<Holiday> holidaySet = new HashSet<Holiday>();
+                holidaySet.add(new StaticDateHoliday(LocalDate.of(2020, Month.JULY, 4), true, "Fourth of July"));
+
+                when(mockHolidayRepository.getAllHolidaysInMonth(Month.JULY)).thenReturn(holidaySet);
+
+                serviceImpl = new CheckoutServiceImpl(toolRepository, mockHolidayRepository);
+
+                RentalAgreement rentalAgreementCheckout = serviceImpl.checkout(toolCode, rentalDayCount, discount,
+                                checkoutDate);
+
+                RentalAgreement rentalAgreementAssert = new RentalAgreement(toolRepository.getTool(toolCode),
+                                rentalDayCount,
+                                checkoutDate, checkoutDate.plusDays(rentalDayCount), 2, 5.98f, discount, 2.99f, 2.99f);
+
+                assertThat(rentalAgreementCheckout).usingRecursiveComparison().isEqualTo(rentalAgreementAssert);
+        }
+
+         @Test
+        public void noHolidayChargeAndNoWeekendCharge_SingleWeekendAndMultiWeekendHolidayInRange_ObservedOnWeekend() throws Exception {
+                String toolCode = "JAKR";
+                int rentalDayCount = 4;
+                int discount = 50;
+                LocalDate checkoutDate = LocalDate.of(2020, 7, 2);
+                HolidayRepository mockHolidayRepository = mock(HolidayRepository.class);
+
+                Set<Holiday> holidaySet = new HashSet<Holiday>();
+                holidaySet.add(new StaticDateHoliday(LocalDate.of(2020, Month.JULY, 4), true, "Fourth of July"));
+                holidaySet.add(new DynamicDateHoliday(1, Month.JULY, DayOfWeek.SUNDAY, "First Sunday of July"));
+
+                when(mockHolidayRepository.getAllHolidaysInMonth(Month.JULY)).thenReturn(holidaySet);
+
+                serviceImpl = new CheckoutServiceImpl(toolRepository, mockHolidayRepository);
+
+                RentalAgreement rentalAgreementCheckout = serviceImpl.checkout(toolCode, rentalDayCount, discount,
+                                checkoutDate);
+
+                RentalAgreement rentalAgreementAssert = new RentalAgreement(toolRepository.getTool(toolCode),
+                                rentalDayCount,
+                                checkoutDate, checkoutDate.plusDays(rentalDayCount), 2, 5.98f, discount, 2.99f, 2.99f);
 
                 assertThat(rentalAgreementCheckout).usingRecursiveComparison().isEqualTo(rentalAgreementAssert);
         }

@@ -14,6 +14,19 @@ import Objects.RentalAgreement;
 import Objects.Tool;
 
 public class CheckoutServiceImpl {
+    private ToolRepository toolRepository;
+    private HolidayRepository holidayRepository;
+
+    public CheckoutServiceImpl() {
+        toolRepository = ToolRepository.getInstance();
+        holidayRepository = HolidayRepository.getInstance();
+    }
+
+    public CheckoutServiceImpl(ToolRepository toolRepository, HolidayRepository holidayRepository) {
+        this.toolRepository = toolRepository;
+        this.holidayRepository = holidayRepository;
+    }
+
     public RentalAgreement checkout(String toolCode, int rentalDayCount, int discount, LocalDate checkoutDate) throws Exception {
         // Data Validation
         if(rentalDayCount < 1) {
@@ -22,8 +35,6 @@ public class CheckoutServiceImpl {
         if(!(discount >= 0 && discount <= 100)) {
             throw new Exception(String.format("Invald Discount percent {%d}: Discount percent must be in the range 0-100", discount));
         }
-
-        ToolRepository toolRepository = ToolRepository.getInstance();
 
         Tool tool = toolRepository.getTool(toolCode);
         if(tool == null) {
@@ -70,11 +81,10 @@ public class CheckoutServiceImpl {
 
     private int getNumberOfHolidays(LocalDate checkoutDate, int rentalDayCount, LocalDate dueDate, boolean weekendCharge) {
         int numberOfHolidays = 0;
-        HolidayRepository holidays = HolidayRepository.getInstance();
         LocalDate currentMonth = checkoutDate.plusDays(1);
 
         while (currentMonth.getYear() < dueDate.getYear() || (currentMonth.getMonthValue() <= dueDate.getMonthValue() && currentMonth.getYear() == dueDate.getYear())) {
-            Set<Holiday> holidaysSet = holidays.getAllHolidaysInMonth(currentMonth.getMonth());
+            Set<Holiday> holidaysSet = holidayRepository.getAllHolidaysInMonth(currentMonth.getMonth());
             if (holidaysSet != null) {
                 //This set makes sure we aren't double counting multiple holidays on the same date
                 Set<LocalDate> holidayDates = new HashSet<LocalDate>();
