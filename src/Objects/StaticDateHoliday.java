@@ -3,18 +3,20 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 
 public class StaticDateHoliday implements Holiday {
-    private LocalDate date;
+    private String name;
+    private LocalDate staticDate;
     private boolean observedOnWeekend;
 
     public StaticDateHoliday(){}
 
-    public StaticDateHoliday(LocalDate date, boolean observedOnWeekend) {
-        this.date = date;
+    public StaticDateHoliday(LocalDate staticDate, boolean observedOnWeekend, String name) {
+        this.staticDate = staticDate;
         this.observedOnWeekend = observedOnWeekend;
+        this.name = name;
     }
 
     public LocalDate getDateInYear(int year) {
-        LocalDate dateInYear = date.withYear(year);
+        LocalDate dateInYear = staticDate.withYear(year);
         if(!observedOnWeekend) {
             if(dateInYear.getDayOfWeek() == DayOfWeek.SATURDAY) {
                 dateInYear = dateInYear.minusDays(1);
@@ -25,12 +27,20 @@ public class StaticDateHoliday implements Holiday {
         return dateInYear;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public String getName() {
+        return name;
     }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public LocalDate getStaticDate() {
+        return staticDate;
+    }
+
+    public void setStaticDate(LocalDate staticDate) {
+        this.staticDate = staticDate;
     }
 
     public boolean isObservedOnWeekend() {
@@ -39,7 +49,5 @@ public class StaticDateHoliday implements Holiday {
 
     public void setObservedOnWeekend(boolean observedOnWeekend) {
         this.observedOnWeekend = observedOnWeekend;
-    }
-
-    
+    }    
 }

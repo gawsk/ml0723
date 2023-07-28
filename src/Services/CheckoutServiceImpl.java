@@ -4,13 +4,13 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 import Repositories.HolidayRepository;
 import Repositories.ToolRepository;
 import Objects.Holiday;
 import Objects.RentalAgreement;
-import Objects.StaticDateHoliday;
 import Objects.Tool;
 
 public class CheckoutServiceImpl {
@@ -26,7 +26,6 @@ public class CheckoutServiceImpl {
         ToolRepository toolRepository = ToolRepository.getInstance();
 
         Tool tool = toolRepository.getTool(toolCode);
-        // Validation for tool can go after here to check for a null response
         if(tool == null) {
             throw new Exception(String.format("Invalid Tool code {%s}: Tool code must be valid in the database", toolCode));
         }
@@ -42,8 +41,6 @@ public class CheckoutServiceImpl {
             chargeableDays -= getNumberOfHolidays(checkoutDate, rentalDayCount, dueDate, tool.getToolType().getWeekendCharge());
         }
 
-        // Reset chargeableDays to 0 if it would ever dip below
-        chargeableDays = Math.max(0, chargeableDays);
 
         BigDecimal preDiscountCharge = new BigDecimal(tool.getToolType().getDailyCharge() * chargeableDays);
         preDiscountCharge = preDiscountCharge.setScale(2, RoundingMode.HALF_UP);
@@ -76,17 +73,21 @@ public class CheckoutServiceImpl {
         HolidayRepository holidays = HolidayRepository.getInstance();
         LocalDate currentMonth = checkoutDate.plusDays(1);
 
-        while (currentMonth.getYear() < dueDate.getYear() || currentMonth.getMonthValue() <= dueDate.getMonthValue()) {
+        while (currentMonth.getYear() < dueDate.getYear() || (currentMonth.getMonthValue() <= dueDate.getMonthValue() && currentMonth.getYear() == dueDate.getYear())) {
             Set<Holiday> holidaysSet = holidays.getAllHolidaysInMonth(currentMonth.getMonth());
             if (holidaysSet != null) {
+                //This set makes sure we aren't double counting multiple holidays on the same date
+                Set<LocalDate> holidayDates = new HashSet<LocalDate>();
                 for(Holiday holiday : holidaysSet) {
                     LocalDate holidayDate = holiday.getDateInYear(currentMonth.getYear());
-                    //isBefore or isEqual === !isAfter
-                    if(holidayDate.isAfter(checkoutDate) && !holidayDate.isAfter(dueDate)) {
-                        if (weekendCharge && holiday instanceof StaticDateHoliday && ((StaticDateHoliday)holiday).isObservedOnWeekend()) {
-                            continue;
+                    if (holidayDates.add(holidayDate)) {
+                        //isBefore || isEqual == !isAfter
+                        if(holidayDate.isAfter(checkoutDate) && !holidayDate.isAfter(dueDate)) {
+                            if (!weekendCharge && (holidayDate.getDayOfWeek() == DayOfWeek.SATURDAY || holidayDate.getDayOfWeek() == DayOfWeek.SUNDAY)) {
+                                continue;
+                            }
+                            numberOfHolidays++;
                         }
-                        numberOfHolidays++;
                     }
                 }
             }

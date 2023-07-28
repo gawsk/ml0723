@@ -16,26 +16,22 @@ import Objects.StaticDateHoliday;
 public class HolidayRepository {
     private static HolidayRepository holidayRepository = new HolidayRepository();
     private Map<Month, Set<Holiday>> holidays;
-    private int totalHolidays;
 
     private HolidayRepository() {
         holidays = new HashMap<Month, Set<Holiday>>();
-        totalHolidays = 0;
 
         LocalDate date = LocalDate.of(2023, Month.JULY, 4);
-        Holiday holiday = new StaticDateHoliday(date, false);
+        Holiday holiday = new StaticDateHoliday(date, false, "Independence Day");
         Set<Holiday> julyHolidays = new HashSet<Holiday>();
         julyHolidays.add(holiday);
         holidays.put(Month.JULY, julyHolidays);
-        totalHolidays++;
 
 
         TemporalAdjuster dayOfWeekInMonth = TemporalAdjusters.dayOfWeekInMonth(1, DayOfWeek.MONDAY);
-        holiday = new DynamicDateHoliday(Month.SEPTEMBER, dayOfWeekInMonth);
+        holiday = new DynamicDateHoliday(Month.SEPTEMBER, dayOfWeekInMonth, "Labor Day");
         Set<Holiday> septemberHolidays = new HashSet<Holiday>();
         septemberHolidays.add(holiday);
         holidays.put(Month.SEPTEMBER, septemberHolidays);
-        totalHolidays++;
     }
 
     public static HolidayRepository getInstance() {
@@ -44,9 +40,5 @@ public class HolidayRepository {
 
     public Set<Holiday> getAllHolidaysInMonth(Month month) {
         return holidays.get(month);
-    }
-
-    public int getTotalHolidays() {
-        return totalHolidays;
     }
 }

@@ -1,34 +1,31 @@
 package Objects;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class RentalAgreement {
-    private String toolCode;
-    private ToolType toolType;
-    private String brand;
+    private Tool tool;
     private int rentalDayCount;
     private LocalDate checkoutDate;
     private LocalDate dueDate;
-    private float dailyCharge;
     private int chargeableDays;
     private float preDiscountCharge;
     private int discountPercent;
     private float discountAmount;
     private float finalCharge;
 
-    // ******************************* Constructers *******************************
+    // ******************************* Constructer *******************************
 
-    public RentalAgreement(){}
+    public RentalAgreement() {
+    }
 
-    public RentalAgreement(Tool tool, int rentalDayCount, LocalDate checkoutDate, LocalDate dueDate, int chargeableDays, float preDiscountCharge, int discountPercent,
-                            float discountAmount, float finalCharge) {
-        this.toolCode = tool.getToolCode();
-        this.toolType = tool.getToolType();
-        this.brand = tool.getBrand();
+    public RentalAgreement(Tool tool, int rentalDayCount, LocalDate checkoutDate, LocalDate dueDate, int chargeableDays,
+            float preDiscountCharge, int discountPercent,
+            float discountAmount, float finalCharge) {
+        this.tool = tool;
         this.rentalDayCount = rentalDayCount;
         this.checkoutDate = checkoutDate;
         this.dueDate = dueDate;
-        this.dailyCharge = tool.getToolType().getDailyCharge();
         this.chargeableDays = chargeableDays;
         this.preDiscountCharge = preDiscountCharge;
         this.discountPercent = discountPercent;
@@ -38,121 +35,77 @@ public class RentalAgreement {
 
     // ******************************* Print Method *******************************
 
-    public void printAgreementValues(){
+    public void printAgreementValues() {
+        StringBuilder rentalAgreement = new StringBuilder();
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yy");
 
-        System.out.println(String.format("Tool code: %s", toolCode));
-        System.out.println(String.format("Tool type: %s", toolType.getName()));
-        System.out.println(String.format("Tool brand: %s", brand));
-        System.out.println(String.format("Rental Days: %d", rentalDayCount));
-        System.out.println(String.format("Check out date: %s", formatter.format(checkoutDate)));
-        System.out.println(String.format("Due date: %s", formatter.format(dueDate)));
-        System.out.println(String.format("Daily rental charge: $%,.2f", toolType.getDailyCharge()));
-        System.out.println(String.format("Charge days: %d", chargeableDays));
-        System.out.println(String.format("Pre-discount charge: $%,.2f", preDiscountCharge));
-        System.out.println(String.format("Discount percent: %d%%", discountPercent));
-        System.out.println(String.format("Discount Amount: $%,.2f", discountAmount));
-        System.out.println(String.format("Final charge: $%,.2f", finalCharge));
+        rentalAgreement.append(String.format("Tool code: %s\n", tool.getToolCode()));
+        rentalAgreement.append(String.format("Tool type: %s\n", tool.getToolType().getName()));
+        rentalAgreement.append(String.format("Tool brand: %s\n", tool.getBrand()));
+        rentalAgreement.append(String.format("Rental Days: %d\n", rentalDayCount));
+        rentalAgreement.append(String.format("Check out date: %s\n", formatter.format(checkoutDate)));
+        rentalAgreement.append(String.format("Due date: %s\n", formatter.format(dueDate)));
+        rentalAgreement.append(String.format("Daily rental charge: $%,.2f\n", tool.getToolType().getDailyCharge()));
+        rentalAgreement.append(String.format("Charge days: %d\n", chargeableDays));
+        rentalAgreement.append(String.format("Pre-discount charge: $%,.2f\n", preDiscountCharge));
+        rentalAgreement.append(String.format("Discount percent: %d%%\n", discountPercent));
+        rentalAgreement.append(String.format("Discount Amount: $%,.2f\n", discountAmount));
+        rentalAgreement.append(String.format("Final charge: $%,.2f\n", finalCharge));
+        System.out.print(rentalAgreement.toString());
     }
 
-    // ******************************* Getters and Setters *******************************
+    // ******************************* Getters *******************************
+
+    public Tool getTool() {
+        return tool;
+    }
 
     public String getToolCode() {
-        return toolCode;
-    }
-
-    public void setToolCode(String toolCode) {
-        this.toolCode = toolCode;
+        return tool.getToolCode();
     }
 
     public ToolType getToolType() {
-        return toolType;
-    }
-
-    public void setToolType(ToolType toolType) {
-        this.toolType = toolType;
+        return tool.getToolType();
     }
 
     public String getBrand() {
-        return brand;
-    }
-
-    public void setBrand(String brand) {
-        this.brand = brand;
+        return tool.getBrand();
     }
 
     public int getRentalDayCount() {
         return rentalDayCount;
     }
 
-    public void setRentalDayCount(int rentalDayCount) {
-        this.rentalDayCount = rentalDayCount;
-    }
-
     public LocalDate getCheckoutDate() {
         return checkoutDate;
-    }
-
-    public void setCheckoutDate(LocalDate checkoutDate) {
-        this.checkoutDate = checkoutDate;
     }
 
     public LocalDate getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(LocalDate dueDate) {
-        this.dueDate = dueDate;
-    }
-
     public float getDailyCharge() {
-        return dailyCharge;
-    }
-
-    public void setDailyCharge(float dailyCharge) {
-        this.dailyCharge = dailyCharge;
+        return tool.getToolType().getDailyCharge();
     }
 
     public int getChargeableDays() {
         return chargeableDays;
     }
 
-    public void setChargeableDays(int chargeableDays) {
-        this.chargeableDays = chargeableDays;
-    }
-
     public float getPreDiscountCharge() {
         return preDiscountCharge;
-    }
-
-    public void setPreDiscountCharge(float preDiscountCharge) {
-        this.preDiscountCharge = preDiscountCharge;
     }
 
     public int getDiscountPercent() {
         return discountPercent;
     }
 
-    public void setDiscountPercent(int discountPercent) {
-        this.discountPercent = discountPercent;
-    }
-
     public float getDiscountAmount() {
         return discountAmount;
-    }
-
-    public void setDiscountAmount(float discountAmount) {
-        this.discountAmount = discountAmount;
     }
 
     public float getFinalCharge() {
         return finalCharge;
     }
-
-    public void setFinalCharge(float finalCharge) {
-        this.finalCharge = finalCharge;
-    }
-
-    
 }
