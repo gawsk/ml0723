@@ -37,21 +37,21 @@ public class RentalAgreement {
 
     public void printAgreementValues() {
         StringBuilder rentalAgreement = new StringBuilder();
-
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yy");
+        String newLine = System.lineSeparator();
 
-        rentalAgreement.append(String.format("Tool code: %s\n", tool.getToolCode()));
-        rentalAgreement.append(String.format("Tool type: %s\n", tool.getToolType().getName()));
-        rentalAgreement.append(String.format("Tool brand: %s\n", tool.getBrand()));
-        rentalAgreement.append(String.format("Rental Days: %d\n", rentalDayCount));
-        rentalAgreement.append(String.format("Check out date: %s\n", formatter.format(checkoutDate)));
-        rentalAgreement.append(String.format("Due date: %s\n", formatter.format(dueDate)));
-        rentalAgreement.append(String.format("Daily rental charge: $%,.2f\n", tool.getToolType().getDailyCharge()));
-        rentalAgreement.append(String.format("Charge days: %d\n", chargeableDays));
-        rentalAgreement.append(String.format("Pre-discount charge: $%,.2f\n", preDiscountCharge));
-        rentalAgreement.append(String.format("Discount percent: %d%%\n", discountPercent));
-        rentalAgreement.append(String.format("Discount Amount: $%,.2f\n", discountAmount));
-        rentalAgreement.append(String.format("Final charge: $%,.2f\n", finalCharge));
+        rentalAgreement.append(String.format("Tool code: %s%s", tool.getToolCode(), newLine));
+        rentalAgreement.append(String.format("Tool type: %s%s", tool.getToolType().getName(), newLine));
+        rentalAgreement.append(String.format("Tool brand: %s%s", tool.getBrand(), newLine));
+        rentalAgreement.append(String.format("Rental Days: %d%s", rentalDayCount, newLine));
+        rentalAgreement.append(String.format("Check out date: %s%s", formatter.format(checkoutDate), newLine));
+        rentalAgreement.append(String.format("Due date: %s%s", formatter.format(dueDate), newLine));
+        rentalAgreement.append(String.format("Daily rental charge: $%,.2f%s", tool.getToolType().getDailyCharge(), newLine));
+        rentalAgreement.append(String.format("Charge days: %d%s", chargeableDays, newLine));
+        rentalAgreement.append(String.format("Pre-discount charge: $%,.2f%s", preDiscountCharge, newLine));
+        rentalAgreement.append(String.format("Discount percent: %d%%%s", discountPercent, newLine));
+        rentalAgreement.append(String.format("Discount Amount: $%,.2f%s", discountAmount, newLine));
+        rentalAgreement.append(String.format("Final charge: $%,.2f%s", finalCharge, newLine));
         System.out.print(rentalAgreement.toString());
     }
 
